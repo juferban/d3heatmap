@@ -23,6 +23,9 @@ NULL
 #'   \code{"Blues"}), or a vector of colors to interpolate in hexadecimal 
 #'   \code{"#RRGGBB"} format, or a color interpolation function like
 #'   \code{\link[grDevices]{colorRamp}}.
+#' @param breaks Analagous to heatmap.2 breaks. Should
+#'   be the same number of breaks as colors
+#' @param symbreaks Breaks symmetrical around zero?
 #' @param width Width in pixels (optional, defaults to automatic sizing).
 #' @param height Height in pixels (optional, defaults to automatic sizing).
 #' 
@@ -75,7 +78,8 @@ NULL
 #' @param RowSideColors (optional) character vector of length nrow(x) containing
 #'   the color names for a vertical side bar that may be used to annotate the
 #'   rows of x.
-#'
+#' @param breaks Analagous to heatmap.2 breaks. Should
+#'   be the same number of breaks as colors
 #' @param labRow character vectors with row labels to use (from top to bottom); default to rownames(x).
 #' @param labCol character vectors with column labels to use (from left to right); default to colnames(x).
 #'         
@@ -96,7 +100,7 @@ NULL
 #' 
 #' 
 d3heatmap <- function(x,
-
+  main = "Heatmap",
   ## dendrogram control
   Rowv = TRUE,
   Colv = if (symm) "Rowv" else TRUE,
@@ -132,6 +136,10 @@ d3heatmap <- function(x,
   ##TODO: decide later which names/conventions to keep
   theme = NULL,
   colors = "RdYlBu",
+  breaks=30,
+  symbreaks=FALSE,
+  colorkey_title="Value",
+
   width = NULL, height = NULL,
   xaxis_height = 80,
   yaxis_width = 120,
@@ -327,7 +335,9 @@ d3heatmap <- function(x,
   ## Final touches before htmlwidgets
   ##=======================
 
-  mtx <- list(data = as.character(t(cellnote)),
+  mtx <- list(
+              x = as.numeric(t(x)),
+              data = as.character(t(cellnote)),
               dim = dim(x),
               rows = rownames(x),
               cols = colnames(x)
@@ -345,10 +355,13 @@ d3heatmap <- function(x,
     colors <- scales::col_numeric(colors, rng, na.color = "transparent")
   }
   
-  imgUri <- encodeAsPNG(t(x), colors)
+  # colors <- colorRampPalette(c("green", "white", "orange"))(breaks)
 
+  imgUri <- encodeAsPNG(t(x), colors)
   options <- list(...)
   
+  colors <- colorRampPalette(c("green", "white", "orange"))(breaks)
+
   options <- c(options, list(
     xaxis_height = xaxis_height,
     yaxis_width = yaxis_width,
@@ -356,7 +369,11 @@ d3heatmap <- function(x,
     yaxis_font_size = yaxis_font_size,
     brush_color = brush_color,
     show_grid = show_grid,
-    anim_duration = anim_duration
+    anim_duration = anim_duration,
+    breaks=breaks,
+    symbreaks=symbreaks,
+    colorkey_title=colorkey_title,
+    colors=colors
   ))
 
   if (is.null(rowDend)) {
@@ -366,7 +383,11 @@ d3heatmap <- function(x,
     c(options, list(xclust_height = 0))
   }
   
-  payload <- list(rows = rowDend, cols = colDend, matrix = mtx, image = imgUri,
+  payload <- list(rows = rowDend, 
+    cols = colDend, 
+    matrix = mtx, 
+    title = main,
+    image = imgUri,
     rowcolors = if (!missing(RowSideColors)) RowSideColors,
     colcolors = if (!missing(ColSideColors)) ColSideColors,
     theme = theme, options = options)
@@ -378,7 +399,7 @@ d3heatmap <- function(x,
     width = width,
     height = height,
     package = 'd3heatmap',
-    sizingPolicy = htmlwidgets::sizingPolicy(browser.fill = TRUE)
+    sizingPolicy = htmlwidgets::sizingPolicy(browser.fill = TRUE, padding=0)
   )
 }
 

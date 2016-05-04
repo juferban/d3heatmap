@@ -85,7 +85,33 @@ function heatmap(selector, data, options) {
 
   var el = d3.select(selector);
 
-  var bbox = el.node().getBoundingClientRect();
+  var outer = el.append("div").classed("outer", true);
+
+  var title = outer.append("svg")
+    .classed("title", true)
+    .attr("height", "50")
+    .attr("width", "10%")
+
+  title.append('text')
+    // .attr('width', 200)
+    .classed('plot_title', true)
+    .text(data.title)
+    .attr('x', '50%')
+    .attr('y', '50%')
+    // .fill("#000000");
+
+
+  var colorkey = outer.append("svg")
+    .classed("colorkey", true)
+    .append("g")
+    .attr("x", 0)
+    .attr("y", 0)
+
+
+  var inner = outer.append("div").classed("inner", true);
+
+
+  var bbox = inner.node().getBoundingClientRect();
 
   var Controller = function() {
     this._events = d3.dispatch("highlight", "datapoint_hover", "transform");
@@ -147,6 +173,13 @@ function heatmap(selector, data, options) {
   opts.xaxis_font_size = options.xaxis_font_size;
   opts.yaxis_font_size = options.yaxis_font_size;
   opts.anim_duration = options.anim_duration;
+
+  // AOC
+  opts.breaks = options.breaks;
+  opts.symbreaks = options.symbreaks;
+  opts.colors = options.colors;
+  opts.colorkey_title = options.colorkey_title;
+
   if (typeof(opts.anim_duration) === 'undefined') {
     opts.anim_duration = 500;
   }
@@ -201,8 +234,14 @@ function heatmap(selector, data, options) {
 
   // Create DOM structure
   (function() {
-    var inner = el.append("div").classed("inner", true);
-    var info = inner.append("div").classed("info", true);
+
+
+    var legend_size = gridSizer.getCellBounds(1,0);
+
+    d3.select('.colorkey')
+      .attr('width', legend_size['width']*4)
+      .attr('height', legend_size['width'] * 2);
+
     var colDend = inner.append("svg").classed("dendrogram colDend", true).style(cssify(colDendBounds));
     var rowDend = inner.append("svg").classed("dendrogram rowDend", true).style(cssify(rowDendBounds));
     var colColors = inner.append("svg").classed("dendrogram colColors", true).style(cssify(colColorsBounds));
@@ -248,14 +287,122 @@ function heatmap(selector, data, options) {
     if (data.length === 0)
       return function() {};
 
-	if (!opts.show_grid) {
-      svg.style("shape-rendering", "crispEdges");
-	}
- 
+  	if (!opts.show_grid) {
+        svg.style("shape-rendering", "crispEdges");
+  	}
+
+
     var cols = data.dim[1];
     var rows = data.dim[0];
+
+
+
+
+    var legend_width = d3.select('.colorkey').attr('width');
+    var legend_height =d3.select('.colorkey').attr('height');
+
+
+    //
+http://bl.ocks.org/mbostock/3048450
+    var hist = d3.layout.histogram(data.data)
+      .bins(opts.breaks)
+
+    var max = d3.max(data.x);
+    var min = d3.min(data.x);
+    // if symm then middle = 0; 
+
+    if(opts.symkey) {
+      min = Math.abs(max) > Math.abs(min) ? (0 - max) : min
+      max = Math.abs(min) >= Math.abs(max) ? max : min
+    } 
+    middle = (min + max)/2
+
+    var interval = (max-min)/opts.breaks;
+    var n = min;
+    var intervals = [];
+    while(n < max) {
+      intervals.push(n);
+      n += interval;
+    } 
+
+    var colorscale = d3.scale.linear()
+      .domain(intervals)
+      .range(opts.colors);
+
+    var legendscale = d3.scale.linear()
+      .domain([min, max])
+      .range([1, legend_width-1]);
+
+
+    // Color ramp place 
+    var xAxis = d3.svg.axis()
+      .ticks(7)
+      .scale(legendscale)
+      .orient("bottom")
+      .tickSize(10);
+
+
+    // (JS shortcut)
+    var legend_key = d3.select('.colorkey')
+      .append("g")
+      .attr("class", "legend_key")
+      .attr('width', '100%')
+      .attr("transform", "translate(0,40)")
+
+    d3.select('.colorkey').append('text')
+      .classed('colorkey_title', true)
+      .text(opts.colorkey_title)
+      .attr('x', '50%')
+      .attr('y', '95%')
+      .attr('padding-top', '1px');
+
+    var histdata = d3.layout.histogram()
+      .bins(intervals)(data.x);
+
+
+    var histy = d3.scale.linear()
+      .domain([0, d3.max(histdata, function(d) { return d.y; })])
+      .range([0, legend_height-40]);
+
+
+    var bar = legend_key.selectAll(".bar")
+        .data(histdata)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("y", function(d) {
+          return(-histy(d.y))
+        })
+        .attr("x", function(d) {
+          return(legendscale(d.x));
+        })
+        .attr("width", legend_width/opts.breaks)
+        .attr("height", function(d) {
+          return(histy(d.y))})
+        .attr("fill", function(d) {
+          return(colorscale(d.x))
+        });
+
+    legend_key.append("rect")
+      .attr("width", legend_width)
+      .attr("height", 8)
+      .attr("fill", "transparent")
+      .classed("legendbox", true)
+
+    legend_key.selectAll(".colorkey")
+      .data(intervals)
+      .enter().append("rect")
+      .attr("height", 8)
+      .attr("x", function(d) {
+        return (legendscale(d)); 
+      })
+      .attr("width", legend_width/opts.breaks)
+      .attr("fill", function(d) { 
+        return(colorscale(d)); 
+      });
+
+    legend_key.call(xAxis);
+
     
-    var merged = data.merged;
     
     var x = d3.scale.linear().domain([0, cols]).range([0, width]);
     var y = d3.scale.linear().domain([0, rows]).range([0, height]);
@@ -270,7 +417,7 @@ function heatmap(selector, data, options) {
         })
         .direction("se")
         .style("position", "fixed");
-    
+    var current_origin = [0,0];
     var brush = d3.svg.brush()
         .x(x)
         .y(y)
@@ -291,6 +438,7 @@ function heatmap(selector, data, options) {
               translate: [0,0],
               extent: [[0,0],[cols,rows]]
             });
+            current_origin = [0,0];
           } else {
             var tf = controller.transform();
             var ex = brush.extent();
@@ -302,30 +450,27 @@ function heatmap(selector, data, options) {
               ex[0][0] * (width / cols) * scale[0] * -1,
               ex[0][1] * (height / rows) * scale[1] * -1
             ];
+            current_origin = ex[0];
             controller.transform({scale: scale, translate: translate, extent: ex});
           }
           brush.clear();
           d3.select(this).call(brush).select(".brush .extent")
               .style({fill: opts.brush_color, stroke: opts.brush_color});
         });
-
     svg = svg
         .attr("width", width)
         .attr("height", height);
-    var rect = svg.selectAll("rect").data(merged);
+    var rect = svg.selectAll("rect").data(data.x);
     rect.enter().append("rect").classed("datapt", true)
         .property("colIndex", function(d, i) { return i % cols; })
         .property("rowIndex", function(d, i) { return Math.floor(i / cols); })
         .property("value", function(d, i) { return d.value; })
         .attr("fill", function(d) {
-          if (!d.color) {
-            return "transparent";
-          }
-          return d.color;
+          return(colorscale(d));
         });
     rect.exit().remove();
     rect.append("title")
-        .text(function(d, i) { return d.label; });
+        .text(function(d, i) { return d; });
     rect.call(tip);
 
     function draw(selection) {
@@ -369,9 +514,9 @@ function heatmap(selector, data, options) {
             offsetY = e.clientY - rect.top;
           }
           
-          var col = Math.floor(x.invert(offsetX));
-          var row = Math.floor(y.invert(offsetY));
-          var label = merged[row*cols + col].label;
+          var col = Math.floor(x.invert(offsetX)) - current_origin[0];
+          var row = Math.floor(y.invert(offsetY)) - current_origin[1];
+          var label = data.x[row*cols + col];
           tip.show({col: col, row: row, label: label}).style({
             top: d3.event.clientY + 15 + "px",
             left: d3.event.clientX + 15 + "px",
