@@ -16,6 +16,12 @@ This is an R package that implements a heatmap [htmlwidget](http://htmlwidgets.o
 * Click and drag over colormap to zoom in (click on colormap to zoom out)
 * Optional clustering and dendrograms, courtesy of `base::heatmap`
 
+New functionality:
+
+* Color Legend
+* (Soon): ColSideColors and RowSideColors legend
+* (Soon): 
+
 ### Example
 
 https://jsfiddle.net/4e13fttr/

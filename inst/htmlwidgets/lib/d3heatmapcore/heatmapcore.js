@@ -5,7 +5,24 @@ function heatmap(selector, data, options) {
   function htmlEscape(str) {
     return (str+"").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
-  
+    
+
+        // Opera 8.0+
+  var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+      // Firefox 1.0+
+  var isFirefox = typeof InstallTrigger !== 'undefined';
+      // At least Safari 3+: "[object HTMLElementConstructor]"
+  var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+      // Internet Explorer 6-11
+  var isIE = /*@cc_on!@*/false || !!document.documentMode;
+      // Edge 20+
+  var isEdge = !isIE && !!window.StyleMedia;
+      // Chrome 1+
+  var isChrome = !!window.chrome && !!window.chrome.webstore;
+      // Blink engine detection
+  var isBlink = (isChrome || isOpera) && !!window.CSS;
+
+
   // Given a list of widths/heights and a total width/height, provides
   // easy access to the absolute top/left/width/height of any individual
   // grid cell. Optionally, a single cell can be specified as a "fill"
@@ -179,6 +196,9 @@ function heatmap(selector, data, options) {
   opts.symbreaks = options.symbreaks;
   opts.colors = options.colors;
   opts.colorkey_title = options.colorkey_title;
+  opts.row_cols = options.row_cols;
+  opts.col_cols = options.col_cols;
+
 
   if (typeof(opts.anim_duration) === 'undefined') {
     opts.anim_duration = 500;
@@ -275,8 +295,20 @@ function heatmap(selector, data, options) {
   })();
   
   var row = !data.rows ? null : dendrogram(el.select('svg.rowDend'), data.rows, false, rowDendBounds.width, rowDendBounds.height, opts.axis_padding);
-  var rowColors = !data.rowcolors ? null : rowColorLabels(el.select('svg.rowColors'), data.rowcolors, rowColorsBounds.width, rowColorsBounds.height, opts.axis_padding);
-  var colColors = !data.colcolors ? null : colColorLabels(el.select('svg.colColors'), data.colcolors, colColorsBounds.width, colColorsBounds.height, opts.axis_padding);
+
+  var rowColorsLabel = opts.row_cols == null ? null : 
+      d3.select('.inner').append('svg')
+      .classed('rowColorsLabel', true)
+
+  var rowColors = !data.rowcolors ? null : rowColorLabels(el.select('svg.rowColors'), data.rowcolors, rowColorsBounds.width, rowColorsBounds.height, opts.axis_padding, opts.row_cols);
+
+
+  var colColorsLabel = opts.col_cols == null ? null : 
+    d3.select('.inner').append('svg')
+      .classed('colColorsLabel', true);
+
+  var colColors = !data.colcolors ? null : colColorLabels(el.select('svg.colColors'), data.colcolors, colColorsBounds.width, colColorsBounds.height, opts.axis_padding, opts.col_cols);
+
   var col = !data.cols ? null : dendrogram(el.select('svg.colDend'), data.cols, true, colDendBounds.width, colDendBounds.height, opts.axis_padding);
   var colormap = colormap(el.select('svg.colormap'), data.matrix, colormapBounds.width, colormapBounds.height);
   var xax = axisLabels(el.select('svg.xaxis'), data.cols || data.matrix.cols, true, xaxisBounds.width, xaxisBounds.height, opts.axis_padding);
@@ -513,8 +545,10 @@ function heatmap(selector, data, options) {
             offsetY = e.clientY - rect.top;
           }
           
-          var col = Math.floor(x.invert(offsetX)) - current_origin[0];
-          var row = Math.floor(y.invert(offsetY)) - current_origin[1];
+          var col = Math.floor(x.invert(offsetX));
+          if(isFirefox) col = col- current_origin[0];
+          var row = Math.floor(y.invert(offsetY));
+          if(isFirefox) row = row - current_origin[1];
           var label = data.x[row*cols + col];
           tip.show({col: col, row: row, label: label}).style({
             top: d3.event.clientY + 15 + "px",
@@ -671,13 +705,57 @@ function heatmap(selector, data, options) {
     return max;
   }
   
-  function rowColorLabels(svg, data, width, height, padding) {
+  function rowColorLabels(svg, data, width, height, padding, colors) {
     svg = svg.append('g');
     
     // Convert matrix to vector
     var rows = data.length;
     data = flattenMatrix(data);
     var cols = data.length / rows;
+
+
+    function onlyUnique(value, index, self) { 
+      return self.indexOf(value) === index;
+    }
+    var colorlabels = data.filter(onlyUnique);
+
+
+    // vertical ordinal colour scale
+    // with legend
+    var collabels = d3.select('.rowColorsLabel')
+
+    var labscale = d3.scale.ordinal()
+      .domain(colorlabels)
+      .range(colors)
+
+    var legendheight = 25*colorlabels.length;
+    // Color scale
+    var colorscale_legendscale = d3.scale.ordinal()
+      .domain(colorlabels) // legend 
+      .rangeRoundBands([0, legendheight]); // height (px)
+
+    var yAxis = d3.svg.axis()
+      .scale(colorscale_legendscale)
+      .orient("right")
+      .tickSize(5)
+
+    // Color ramp: bricks
+    collabels.selectAll(".colorscale_key")
+      .data(colorlabels)
+      .enter().append("rect")
+      .attr("class", "rscol_label")
+      .attr("width", 8)
+      .attr('x', 0)
+      .attr("height", function(d) { 
+        return (colorscale_legendscale.rangeBand()); 
+      })
+      .attr("y", function(d) { 
+        return (colorscale_legendscale(d) +"px"); 
+      })
+      .attr('fill', function(d) { return labscale(d); });
+
+    collabels.call(yAxis);
+
 
     var x = d3.scale.linear()
         .domain([0, rows])
@@ -726,7 +804,7 @@ function heatmap(selector, data, options) {
     return vec;
   }
 
-  function colColorLabels(svg, data, width, height, padding) {
+  function colColorLabels(svg, data, width, height, padding, colors) {
     svg = svg.append('g');
     
     // Convert matrix to vector
@@ -734,6 +812,54 @@ function heatmap(selector, data, options) {
     data = flattenMatrix(data);
     var cols = data.length / rows;
     
+
+
+
+    function onlyUnique(value, index, self) { 
+      return self.indexOf(value) === index;
+    }
+    var colorlabels = data.filter(onlyUnique);
+
+    // vertical ordinal colour scale
+    // with legend
+    var collabels=d3.select('.colColorsLabel')
+
+    var labscale = d3.scale.ordinal()
+      .domain(colorlabels)
+      .range(colors)
+
+    var legendheight = 25*colorlabels.length;
+    // Color scale
+    var colorscale_legendscale = d3.scale.ordinal()
+      .domain(colorlabels) // legend 
+      .rangeRoundBands([0, legendheight]); // height (px)
+
+    var yAxis = d3.svg.axis()
+      .scale(colorscale_legendscale)
+      .orient("right")
+      .tickSize(7)
+
+
+    // Color ramp: bricks
+    collabels.selectAll(".colorscale_key")
+      .data(colorlabels)
+      .enter().append("rect")
+      .attr("class", "cscol_label")
+      .attr("width", 8)
+      .attr('x', 0)
+      .attr("height", function(d) { 
+        return (colorscale_legendscale.rangeBand()); 
+      })
+      .attr("y", function(d) { 
+        return (colorscale_legendscale(d) +"px"); 
+      })
+      .attr('fill', function(d) { return labscale(d); });
+
+    collabels.call(yAxis);
+
+
+
+
     var x = d3.scale.linear()
         .domain([0, cols])
         .range([0, width]);

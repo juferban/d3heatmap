@@ -23,6 +23,21 @@ body.theme-dark {
     font-family: Helvetica;
 }
 
+.colColorsLabel {
+  position: absolute;
+  float:right;
+  width: 50px;
+  height: 350px;
+}
+
+
+.rowColorsLabel {
+  position: absolute;
+  float: left;
+  width: 50px;
+  height: 350px;
+}
+
 
 .bar {
   stroke:#000000;

@@ -145,6 +145,9 @@ d3heatmap <- function(x,
   symbreaks=FALSE,
   colorkey_title="Value",
 
+  col_cols=NULL,
+  row_cols=NULL,
+
   width = NULL, height = NULL,
   xaxis_height = 80,
   yaxis_width = 120,
@@ -270,20 +273,17 @@ d3heatmap <- function(x,
     if (!is.matrix(RowSideColors)) {
       RowSideColors <- matrix(RowSideColors, nrow = 1)
     }        
-    if (!all(are_colors(RowSideColors))) {
-      rsc_labs <- unique(as.factor(RowSideColors))
-      RowSideColors[] <- colorRampPalette(c("purple", "orange", "black"))(length(rsc_labs))[as.factor(RowSideColors)]
-    }
+    rsc_labs <- unique(as.factor(RowSideColors))
+    row_cols <- colorRampPalette(c("purple", "orange", "black"))(length(rsc_labs))
+    
     RowSideColors <- RowSideColors[, rowInd, drop = FALSE]
   }
   if (!missing(ColSideColors)) {
     if (!is.matrix(ColSideColors)) {
       ColSideColors <- matrix(ColSideColors, nrow = 1)
     }
-    if (!all(are_colors(ColSideColors))) {
-      csc_labs <- unique(as.factor(ColSideColors))
-      ColSideColors[] <- colorRampPalette(c("cyan", "maroon"))(length(csc_labs))[as.factor(ColSideColors)]
-    }
+    csc_labs <- unique(as.factor(ColSideColors))
+    col_cols <- colorRampPalette(c("cyan", "maroon"))(length(csc_labs))
     ColSideColors <- ColSideColors[, colInd, drop = FALSE]
   }
 
@@ -349,7 +349,7 @@ d3heatmap <- function(x,
   ##=======================
 
   mtx <- list(
-              x = as.numeric(t(x)),
+              x = as.numeric(t(round(x, digits=digits))),
               data = as.character(t(cellnote)),
               dim = dim(x),
               rows = rownames(x),
@@ -390,7 +390,9 @@ d3heatmap <- function(x,
     breaks=breaks,
     symbreaks=symbreaks,
     colorkey_title=colorkey_title,
-    colors=scalecolors
+    colors=scalecolors,
+    col_cols=col_cols,
+    row_cols=row_cols
   ))
 
   if (is.null(rowDend)) {
