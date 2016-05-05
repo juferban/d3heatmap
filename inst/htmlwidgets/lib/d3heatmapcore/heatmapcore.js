@@ -303,7 +303,7 @@ function heatmap(selector, data, options) {
 
 
     //
-http://bl.ocks.org/mbostock/3048450
+    // http://bl.ocks.org/mbostock/3048450
     var hist = d3.layout.histogram(data.data)
       .bins(opts.breaks)
 
@@ -311,7 +311,7 @@ http://bl.ocks.org/mbostock/3048450
     var min = d3.min(data.x);
     // if symm then middle = 0; 
 
-    if(opts.symkey) {
+    if(opts.symbreaks) {
       min = Math.abs(max) > Math.abs(min) ? (0 - max) : min
       max = Math.abs(min) >= Math.abs(max) ? max : min
     } 
@@ -329,10 +329,11 @@ http://bl.ocks.org/mbostock/3048450
       .domain(intervals)
       .range(opts.colors);
 
-    var legendscale = d3.scale.linear()
-      .domain([min, max])
-      .range([1, legend_width-1]);
+    var blockwidth = legend_width/opts.breaks;
 
+    var legendscale = d3.scale.linear()
+      .domain([d3.min(intervals), d3.max(intervals)])
+      .range([1, legend_width-blockwidth-1]);
 
     // Color ramp place 
     var xAxis = d3.svg.axis()
@@ -375,7 +376,7 @@ http://bl.ocks.org/mbostock/3048450
         .attr("x", function(d) {
           return(legendscale(d.x));
         })
-        .attr("width", legend_width/opts.breaks)
+        .attr("width", blockwidth)
         .attr("height", function(d) {
           return(histy(d.y))})
         .attr("fill", function(d) {
@@ -395,7 +396,7 @@ http://bl.ocks.org/mbostock/3048450
       .attr("x", function(d) {
         return (legendscale(d)); 
       })
-      .attr("width", legend_width/opts.breaks)
+      .attr("width", blockwidth)
       .attr("fill", function(d) { 
         return(colorscale(d)); 
       });

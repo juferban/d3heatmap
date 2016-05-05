@@ -19,6 +19,10 @@ body.theme-dark {
   width: 100%;
   height: 100%;
 }
+.tick {
+    font-family: Helvetica;
+}
+
 
 .bar {
   stroke:#000000;
