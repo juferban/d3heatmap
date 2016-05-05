@@ -19,7 +19,11 @@ NULL
 #' @param theme A custom CSS theme to use. Currently the only valid values are 
 #'   \code{""} and \code{"dark"}. \code{"dark"} is primarily intended for 
 #'   standalone visualizations, not R Markdown or Shiny.
-#' @param colors Either a colorbrewer2.org palette name (e.g. \code{"YlOrRd"} or
+#' @param scalecolors Colors to be used in scale. Length
+#' must be equal to breaks
+#' @param colors TEMPORARILY DISABLED WHILE TRANSITIONING
+#' METHOD FOR GENERATING COLORS. USE scalecolors INSTEAD.
+#' Either a colorbrewer2.org palette name (e.g. \code{"YlOrRd"} or
 #'   \code{"Blues"}), or a vector of colors to interpolate in hexadecimal 
 #'   \code{"#RRGGBB"} format, or a color interpolation function like
 #'   \code{\link[grDevices]{colorRamp}}.
@@ -137,6 +141,7 @@ d3heatmap <- function(x,
   theme = NULL,
   colors = "RdYlBu",
   breaks=30,
+  scalecolors = NULL,
   symbreaks=FALSE,
   colorkey_title="Value",
 
@@ -264,6 +269,10 @@ d3heatmap <- function(x,
   if (!missing(RowSideColors)) {
     if (!is.matrix(RowSideColors)) {
       RowSideColors <- matrix(RowSideColors, nrow = 1)
+    }        
+    if (!all(are_colors(RowSideColors))) {
+      rsc_labs <- unique(as.factor(RowSideColors))
+      RowSideColors[] <- colorRampPalette(c("purple", "orange", "black"))(length(rsc_labs))[as.factor(RowSideColors)]
     }
     RowSideColors <- RowSideColors[, rowInd, drop = FALSE]
   }
@@ -271,9 +280,13 @@ d3heatmap <- function(x,
     if (!is.matrix(ColSideColors)) {
       ColSideColors <- matrix(ColSideColors, nrow = 1)
     }
+    if (!all(are_colors(ColSideColors))) {
+      csc_labs <- unique(as.factor(ColSideColors))
+      ColSideColors[] <- colorRampPalette(c("cyan", "maroon"))(length(csc_labs))[as.factor(ColSideColors)]
+    }
     ColSideColors <- ColSideColors[, colInd, drop = FALSE]
   }
-  
+
   ## Dendrograms - Update the labels and change to dendToTree
   ##=======================
 
@@ -354,13 +367,17 @@ d3heatmap <- function(x,
     
     colors <- scales::col_numeric(colors, rng, na.color = "transparent")
   }
-  
-  # colors <- colorRampPalette(c("green", "white", "orange"))(breaks)
+
 
   imgUri <- encodeAsPNG(t(x), colors)
   options <- list(...)
   
-  colors <- colorRampPalette(c("green", "white", "orange"))(breaks)
+
+  if(is.null(scalecolors)) {
+    scalecolors <- colorRampPalette(c("blue", "white", "red"))(breaks) 
+  } else if(is.character(scalecolors)) {
+    scalecolors <- colorRampPalette(scalecolors)(breaks)
+  }
 
   options <- c(options, list(
     xaxis_height = xaxis_height,
@@ -373,7 +390,7 @@ d3heatmap <- function(x,
     breaks=breaks,
     symbreaks=symbreaks,
     colorkey_title=colorkey_title,
-    colors=colors
+    colors=scalecolors
   ))
 
   if (is.null(rowDend)) {
@@ -461,3 +478,19 @@ renderD3heatmap <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
   shinyRenderWidget(expr, d3heatmapOutput, env, quoted = TRUE)
 }
+
+#' are_colors 
+#' Helper function to check for valid color strings
+#' @param x color vector (etc) to test. 
+#' 
+#' Taken (untested) from:
+#' http://stackoverflow.com/questions/13289009/check-if-character-string-is-a-valid-color-representation#13290832
+
+are_colors <- function(x) {
+  if(is.numeric(x)) return(FALSE)
+  sapply(x, function(X) {
+    res <- try(col2rgb(x),silent=TRUE)
+    return(!"try-error"%in%class(res))
+  })
+}
+

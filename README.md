@@ -18,7 +18,8 @@ This is an R package that implements a heatmap [htmlwidget](http://htmlwidgets.o
 
 ### Example
 
-http://rpubs.com/jcheng/mtcars-heatmap
+https://jsfiddle.net/4e13fttr/
+
 
 ### Installation
 

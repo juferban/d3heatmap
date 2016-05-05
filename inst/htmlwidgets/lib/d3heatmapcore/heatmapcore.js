@@ -296,8 +296,6 @@ function heatmap(selector, data, options) {
     var rows = data.dim[0];
 
 
-
-
     var legend_width = d3.select('.colorkey').attr('width');
     var legend_height =d3.select('.colorkey').attr('height');
 
