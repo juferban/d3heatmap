@@ -767,7 +767,7 @@ function heatmap(selector, data, options) {
     var rect = svg.selectAll("rect").data(data);
     rect.enter()
         .append("rect")
-        .attr("fill", function(d, i) { return d; });
+        .attr("fill", function(d, i) { return labscale(d); });
     rect.exit()
         .remove();
     
@@ -870,7 +870,7 @@ function heatmap(selector, data, options) {
     var rect = svg.selectAll("rect").data(data);
     rect.enter()
         .append("rect")
-        .attr("fill", function(d, i) { return d; });
+        .attr("fill", function(d, i) { return labscale(d); });
     rect.exit()
         .remove();
     
