@@ -743,7 +743,7 @@ function heatmap(selector, data, options) {
     collabels.selectAll(".colorscale_key")
       .data(colorlabels)
       .enter().append("rect")
-      .attr("class", "rscol_label")
+      .attr("class", "scol_label")
       .attr("width", 8)
       .attr('x', 0)
       .attr("height", function(d) { 
@@ -844,7 +844,7 @@ function heatmap(selector, data, options) {
     collabels.selectAll(".colorscale_key")
       .data(colorlabels)
       .enter().append("rect")
-      .attr("class", "cscol_label")
+      .attr("class", "scol_label")
       .attr("width", 8)
       .attr('x', 0)
       .attr("height", function(d) { 
