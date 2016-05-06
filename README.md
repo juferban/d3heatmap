@@ -19,13 +19,13 @@ This is an R package that implements a heatmap [htmlwidget](http://htmlwidgets.o
 New functionality:
 
 * Color Legend
-* (Soon): ColSideColors and RowSideColors legend
-* (Soon): 
+* ColSideColors and RowSideColors legend
+* (Soon): Better layout/padding
+* (Soon): Different parameters 
 
 ### Example
 
-https://jsfiddle.net/4e13fttr/
-
+https://jsfiddle.net/4e13fttr/3/
 
 ### Installation
 

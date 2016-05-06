@@ -39,7 +39,8 @@ body.theme-dark {
 }
 
 .rowColorsLabel {
-  position: absolute;
+  position: relative;
+  padding: 10px;
   float: left;
   width: 50px;
   height: 350px;

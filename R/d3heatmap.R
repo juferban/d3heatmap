@@ -86,6 +86,7 @@ NULL
 #'   be the same number of breaks as colors
 #' @param labRow character vectors with row labels to use (from top to bottom); default to rownames(x).
 #' @param labCol character vectors with column labels to use (from left to right); default to colnames(x).
+#' @param padding css/html padding around app
 #'         
 #' @param ... Undocumented/experimental options (currently \code{xcolors_height} and \code{ycolors_width})
 #' 
@@ -156,6 +157,7 @@ d3heatmap <- function(x,
   brush_color = "#0000FF",
   show_grid = TRUE,
   anim_duration = 500,
+  padding=0,
   
   ...
 ) {
@@ -418,7 +420,7 @@ d3heatmap <- function(x,
     width = width,
     height = height,
     package = 'd3heatmap',
-    sizingPolicy = htmlwidgets::sizingPolicy(browser.fill = TRUE, padding=0)
+    sizingPolicy = htmlwidgets::sizingPolicy(browser.fill = TRUE, padding=padding)
   )
 }
 
