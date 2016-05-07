@@ -9,9 +9,10 @@ body.theme-dark {
 }
 
 .title {
+  font-size: 2em;
   position:absolute;
-  margin-right: 50%;
-  margin-left: 50%;
+  /*margin-right: 30%;*/
+  margin-left: 30%;
 }
 
 .outer {

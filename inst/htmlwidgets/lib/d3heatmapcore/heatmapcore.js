@@ -107,10 +107,10 @@ function heatmap(selector, data, options) {
   var title = outer.append("svg")
     .classed("title", true)
     .attr("height", "50")
-    .attr("width", "10%")
+    .attr("width", "40%")
 
   title.append('text')
-    // .attr('width', 200)
+    // .attr('width', 300)
     .classed('plot_title', true)
     .text(data.title)
     .attr('x', '50%')
@@ -393,7 +393,7 @@ function heatmap(selector, data, options) {
 
     var histy = d3.scale.linear()
       .domain([0, d3.max(histdata, function(d) { return d.y; })])
-      .range([0, legend_height-40]);
+      .range([0, legend_height-45]);
 
 
     var bar = legend_key.selectAll(".bar")

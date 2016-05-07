@@ -25,7 +25,7 @@ New functionality:
 
 ### Example
 
-https://jsfiddle.net/4e13fttr/3/
+https://jsfiddle.net/4e13fttr/6/
 
 ### Installation
 
