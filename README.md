@@ -25,7 +25,7 @@ New functionality:
 
 ### Example
 
-https://jsfiddle.net/4e13fttr/6/
+https://jsfiddle.net/jhhf67qv/11/
 
 ### Installation
 
@@ -34,6 +34,9 @@ To install:
 ```r
 if (!require("devtools")) install.packages("devtools")
 devtools::install_github("Alanocallaghan/d3heatmap")
+
+Alternatively you can download the package as an archive and install locally using `devtools::install()`, eg:
+`devtools::install("[path_to_package]/d3heatmap")`
 ```
 
 ### Usage
@@ -46,5 +49,24 @@ d3heatmap(mtcars, scale = "column", colors = "Spectral")
 ```
 
 You can also include them in R Markdown chunks, or use them in Shiny applications with the `d3heatmapOutput` and `renderD3heatmap` functions.
+
+You can also create standalone pages using 
+`htmlwidgets::saveWidget()`, eg
+
+`install("./d3heatmap")
+
+library("d3heatmap")
+
+
+d <- d3heatmap(mtcars, 
+    main = "mtcars demo", 
+    scale = "column", 
+    RowSideColors = t(mtcars[, c("cyl", "gear")]),
+    show_grid = FALSE,
+    cellnote_scale = TRUE,
+    symbreaks = TRUE
+)
+
+htmlwidgets::saveWidget(d, file="testd3.html", selfcontained=TRUE)`
 
 See `?d3heatmap` for options.
