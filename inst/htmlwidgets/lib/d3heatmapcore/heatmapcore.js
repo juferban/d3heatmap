@@ -6,6 +6,7 @@ function heatmap(selector, data, options) {
     return (str+"").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
     
+  d3.selectAll(".outer").remove();
 
         // Opera 8.0+
   var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
@@ -198,6 +199,7 @@ function heatmap(selector, data, options) {
   opts.colorkey_title = options.colorkey_title;
   opts.row_cols = options.row_cols;
   opts.col_cols = options.col_cols;
+  opts.show_color_legend = options.show_color_legend;
 
 
   if (typeof(opts.anim_duration) === 'undefined') {
@@ -299,13 +301,18 @@ function heatmap(selector, data, options) {
   var rowColorsLabel = opts.row_cols == null ? null : 
       d3.select('.inner').append('svg')
       .classed('rowColorsLabel', true)
+      .attr("height", "100%")
+      .attr("width", "20%");
+
 
   var rowColors = !data.rowcolors ? null : rowColorLabels(el.select('svg.rowColors'), data.rowcolors, rowColorsBounds.width, rowColorsBounds.height, opts.axis_padding, opts.row_cols);
 
 
   var colColorsLabel = opts.col_cols == null ? null : 
     d3.select('.inner').append('svg')
-      .classed('colColorsLabel', true);
+      .classed('colColorsLabel', true)
+      .attr("height", "100%")
+      .attr("width", "20%");
 
   var colColors = !data.colcolors ? null : colColorLabels(el.select('svg.colColors'), data.colcolors, colColorsBounds.width, colColorsBounds.height, opts.axis_padding, opts.col_cols);
 
@@ -327,74 +334,73 @@ function heatmap(selector, data, options) {
     var cols = data.dim[1];
     var rows = data.dim[0];
 
-
-    var legend_width = d3.select('.colorkey').attr('width');
-    var legend_height =d3.select('.colorkey').attr('height');
-
-
-    //
-    // http://bl.ocks.org/mbostock/3048450
-    var hist = d3.layout.histogram(data.data)
-      .bins(opts.breaks)
-
     var max = d3.max(data.x);
     var min = d3.min(data.x);
-    // if symm then middle = 0; 
 
     if(opts.symbreaks) {
       min = Math.abs(max) > Math.abs(min) ? (0 - max) : min
       max = Math.abs(min) >= Math.abs(max) ? max : min
-    } 
-    middle = (min + max)/2
+    }
 
-    var interval = (max-min)/opts.breaks;
+
+    var interval = (max - min) / opts.breaks;
     var n = min;
     var intervals = [];
-    while(n < max) {
+    while(n <= max) {
       intervals.push(n);
       n += interval;
-    } 
+    }     
+    // intervals.push(0);
+    // intervals.sort(function (a,b) { return a - b; });;
+
 
     var colorscale = d3.scale.linear()
       .domain(intervals)
       .range(opts.colors);
 
-    var blockwidth = legend_width/opts.breaks;
+    if(opts.show_color_legend) {
+      var legend_width = d3.select('.colorkey').attr('width');
+      var legend_height = d3.select('.colorkey').attr('height');
 
-    var legendscale = d3.scale.linear()
-      .domain([d3.min(intervals), d3.max(intervals)])
-      .range([1, legend_width-blockwidth-1]);
+      // http://bl.ocks.org/mbostock/3048450
+      var hist = d3.layout.histogram(data.x)
+        .bins(opts.breaks)
 
-    // Color ramp place 
-    var xAxis = d3.svg.axis()
-      .ticks(7)
-      .scale(legendscale)
-      .orient("bottom")
-      .tickSize(10);
+      var blockwidth = legend_width / opts.breaks;
 
+      var legendscale = d3.scale.linear()
+        .domain([min, max])
+        .range([0, (legend_width - blockwidth - 1)]);
 
-    // (JS shortcut)
-    var legend_key = d3.select('.colorkey')
-      .append("g")
-      .attr("class", "legend_key")
-      .attr('width', '100%')
-      .attr("transform", "translate(0,40)")
-
-    d3.select('.colorkey').append('text')
-      .classed('colorkey_title', true)
-      .text(opts.colorkey_title)
-      .attr('x', '50%')
-      .attr('y', '95%')
-      .attr('padding-top', '1px');
-
-    var histdata = d3.layout.histogram()
-      .bins(intervals)(data.x);
+      // Color ramp place 
+      var xAxis = d3.svg.axis()
+        .ticks(5)
+        .scale(legendscale)
+        .orient("bottom")
+        .tickSize(10);
 
 
-    var histy = d3.scale.linear()
-      .domain([0, d3.max(histdata, function(d) { return d.y; })])
-      .range([0, legend_height-45]);
+      // (JS shortcut)
+      var legend_key = d3.select('.colorkey')
+        .append("g")
+        .attr("class", "legend_key")
+        .attr('width', '100%')
+        .attr("transform", "translate(0," + (legend_height /  2) + ")")
 
+      d3.select('.colorkey').append('text')
+        .classed('colorkey_title', true)
+        .text(opts.colorkey_title)
+        .attr('x', '50%')
+        .attr('y', '95%')
+        .attr('padding-top', '1px');
+
+      var histdata = d3.layout.histogram()
+        .bins(intervals)(data.x);
+
+
+      var histy = d3.scale.linear()
+        .domain([0, d3.max(histdata, function(d) { return d.y; })])
+        .range([0, legend_height / 2]);
 
     var bar = legend_key.selectAll(".bar")
         .data(histdata)
@@ -414,7 +420,7 @@ function heatmap(selector, data, options) {
         });
 
     legend_key.append("rect")
-      .attr("width", legend_width)
+      .attr("width", legend_width - blockwidth)
       .attr("height", 8)
       .attr("fill", "transparent")
       .classed("legendbox", true)
@@ -430,6 +436,7 @@ function heatmap(selector, data, options) {
       .attr("fill", function(d) { 
         return(colorscale(d)); 
       });
+    }
 
     legend_key.call(xAxis);
 
@@ -737,7 +744,7 @@ function heatmap(selector, data, options) {
     var yAxis = d3.svg.axis()
       .scale(colorscale_legendscale)
       .orient("right")
-      .tickSize(5)
+      .tickSize(5);
 
     // Color ramp: bricks
     collabels.selectAll(".colorscale_key")
@@ -828,7 +835,9 @@ function heatmap(selector, data, options) {
       .domain(colorlabels)
       .range(colors)
 
-    var legendheight = 25*colorlabels.length;
+
+
+    var legendheight = 25 * colorlabels.length;
     // Color scale
     var colorscale_legendscale = d3.scale.ordinal()
       .domain(colorlabels) // legend 
@@ -838,7 +847,6 @@ function heatmap(selector, data, options) {
       .scale(colorscale_legendscale)
       .orient("right")
       .tickSize(7)
-
 
     // Color ramp: bricks
     collabels.selectAll(".colorscale_key")
@@ -856,9 +864,6 @@ function heatmap(selector, data, options) {
       .attr('fill', function(d) { return labscale(d); });
 
     collabels.call(yAxis);
-
-
-
 
     var x = d3.scale.linear()
         .domain([0, cols])

@@ -27,6 +27,8 @@ NULL
 #'   \code{"Blues"}), or a vector of colors to interpolate in hexadecimal 
 #'   \code{"#RRGGBB"} format, or a color interpolation function like
 #'   \code{\link[grDevices]{colorRamp}}.
+#' @param show_color_legend Show color key and density 
+#'    information? (TRUE/FALSE)
 #' @param breaks Analagous to heatmap.2 breaks. Should
 #'   be the same number of breaks as colors
 #' @param symbreaks Breaks symmetrical around zero?
@@ -145,11 +147,13 @@ d3heatmap <- function(x,
   scalecolors = NULL,
   symbreaks=FALSE,
   colorkey_title="Value",
+  show_color_legend = TRUE,
 
   col_cols=NULL,
   row_cols=NULL,
 
-  width = NULL, height = NULL,
+  width = NULL, 
+  height = NULL,
   xaxis_height = 80,
   yaxis_width = 120,
   xaxis_font_size = NULL,
@@ -157,8 +161,7 @@ d3heatmap <- function(x,
   brush_color = "#0000FF",
   show_grid = TRUE,
   anim_duration = 500,
-  padding=0,
-  
+  padding=0,  
   ...
 ) {
   
@@ -268,13 +271,14 @@ d3heatmap <- function(x,
   
   ## reorder x (and others)
   ##=======================
+  ## TODO: Sensible dimensions plus deal with data.frames
   x <- x[rowInd, colInd]
   if (!missing(cellnote))
     cellnote <- cellnote[rowInd, colInd]
   if (!missing(RowSideColors)) {
     if (!is.matrix(RowSideColors)) {
       RowSideColors <- matrix(RowSideColors, nrow = 1)
-    }        
+    }
     rsc_labs <- unique(as.factor(RowSideColors))
     row_cols <- colorRampPalette(c("purple", "orange", "black"))(length(rsc_labs))
     
@@ -285,7 +289,7 @@ d3heatmap <- function(x,
       ColSideColors <- matrix(ColSideColors, nrow = 1)
     }
     csc_labs <- unique(as.factor(ColSideColors))
-    col_cols <- colorRampPalette(c("cyan", "maroon"))(length(csc_labs))
+    col_cols <- colorRampPalette(c("cyan", "maroon", "green"))(length(csc_labs))
     ColSideColors <- ColSideColors[, colInd, drop = FALSE]
   }
 
@@ -352,7 +356,7 @@ d3heatmap <- function(x,
 
   mtx <- list(
               x = as.numeric(t(round(x, digits=digits))),
-              data = as.character(t(cellnote)),
+              # data = as.character(t(cellnote)),
               dim = dim(x),
               rows = rownames(x),
               cols = colnames(x)
@@ -376,9 +380,9 @@ d3heatmap <- function(x,
   
 
   if(is.null(scalecolors)) {
-    scalecolors <- colorRampPalette(c("blue", "white", "red"))(breaks) 
+    scalecolors <- colorRampPalette(c("blue", "white", "red"))(breaks + 1) 
   } else if(is.character(scalecolors)) {
-    scalecolors <- colorRampPalette(scalecolors)(breaks)
+    scalecolors <- colorRampPalette(scalecolors)(breaks + 1)
   }
 
   options <- c(options, list(
@@ -394,7 +398,8 @@ d3heatmap <- function(x,
     colorkey_title=colorkey_title,
     colors=scalecolors,
     col_cols=col_cols,
-    row_cols=row_cols
+    row_cols=row_cols,
+    show_color_legend = show_color_legend
   ))
 
   if (is.null(rowDend)) {

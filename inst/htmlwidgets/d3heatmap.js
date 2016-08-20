@@ -40,19 +40,7 @@ HTMLWidgets.widget({
       if (w !== x.matrix.dim[0] || h !== x.matrix.dim[1]) {
         throw new Error("Color dimensions didn't match data dimensions")
       }
-      
-      var merged = [];
-      for (var i = 0; i < x.matrix.data.length; i++) {
-        var r = imgData[i*4];
-        var g = imgData[i*4+1];
-        var b = imgData[i*4+2];
-        var a = imgData[i*4+3];
-        merged.push({
-          label: x.matrix.data[i],
-          color: "rgba(" + [r,g,b,a/255].join(",") + ")"
-        })
-      }
-      x.matrix.merged = merged;
+
       //console.log(JSON.stringify({merged: x.matrix.merged}, null, "  "));
 
       var hm = heatmap(el, x, x.options);

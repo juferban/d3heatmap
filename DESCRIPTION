@@ -11,10 +11,10 @@ Authors@R: c(
     person("Justin", "Palmer", role = c("ctb", "cph"), comment = "d3.tip library")
     )
 Maintainer: Joe Cheng <joe@rstudio.com>
-Description: Create interactive heat maps that are usable from the R console, in the
-    'RStudio' viewer pane, in 'R Markdown' documents, and in 'Shiny' apps. Hover the
-    mouse pointer over a cell to show details, drag a rectangle to zoom, and click
-    row/column labels to highlight.
+Description: Create interactive heat maps that are usable from the R console, in
+    the 'RStudio' viewer pane, in 'R Markdown' documents, and in 'Shiny' apps. Hover
+    the mouse pointer over a cell to show details, drag a rectangle to zoom, and
+    click row/column labels to highlight.
 License: GPL-3 | file LICENSE
 Imports:
     scales (>= 0.2.5),
@@ -33,3 +33,4 @@ BugReports: https://github.com/rstudio/d3heatmap/issues
 Collate:
     'd3heatmap.R'
     'dendrogram.R'
+RoxygenNote: 5.0.1

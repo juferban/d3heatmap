@@ -8,6 +8,10 @@ body.theme-dark {
 .theme-dark .link {
 }
 
+.colorkey .tick {
+    font-size: 0.8em;
+}
+
 .title {
   font-size: 2em;
   position:absolute;
@@ -25,9 +29,13 @@ body.theme-dark {
 }
 
 .colColorsLabel {
+  font-family: Helvetica;
+  font-size: 0.7em;
+  margin-left: 5px;
+  /*margin-right: 50px;*/
   position: absolute;
   float:right;
-  width: 50px;
+  width: 100px;
   height: 350px;
 }
 
@@ -40,10 +48,14 @@ body.theme-dark {
 }
 
 .rowColorsLabel {
+  font-family: Helvetica;
+  font-size: 0.7em;
+  margin-left: 5px;
+  /*margin-right: 50px;*/
   position: relative;
   padding: 10px;
   float: left;
-  width: 50px;
+  width: 100px;
   height: 350px;
 }
 
