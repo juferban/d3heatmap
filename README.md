@@ -54,17 +54,18 @@ You can also create standalone pages using
 `htmlwidgets::saveWidget()`, eg
 
 
-`install("./d3heatmap")`
+    install("./d3heatmap")
 
-`library("d3heatmap")`
-`d <- d3heatmap(mtcars, 
-    main = "mtcars demo", 
-    scale = "column", 
-    RowSideColors = t(mtcars[, c("cyl", "gear")]),
-    show_grid = FALSE,
-    cellnote_scale = TRUE,
-    symbreaks = TRUE
-)`
-`htmlwidgets::saveWidget(d, file="testd3.html", selfcontained=TRUE)`
+    library("d3heatmap")`
+    d <- d3heatmap(mtcars, 
+        main = "mtcars demo", 
+        scale = "column", 
+        RowSideColors = t(mtcars[, c("cyl", "gear")]),
+        show_grid = FALSE,
+        cellnote_scale = TRUE,
+        symbreaks = TRUE
+    )`
+    
+    htmlwidgets::saveWidget(d, file="testd3.html", selfcontained=TRUE)
 
 See `?d3heatmap` for options.
