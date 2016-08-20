@@ -53,7 +53,8 @@ You can also include them in R Markdown chunks, or use them in Shiny application
 You can also create standalone pages using 
 `htmlwidgets::saveWidget()`, eg
 
-`install("./d3heatmap")
+`
+install("./d3heatmap")
 
 library("d3heatmap")
 
