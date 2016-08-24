@@ -41,11 +41,12 @@ HTMLWidgets.widget({
         throw new Error("Color dimensions didn't match data dimensions")
       }
 
-      //console.log(JSON.stringify({merged: x.matrix.merged}, null, "  "));
-
       var hm = heatmap(el, x, x.options);
       if (window.Shiny) {
-        var id = self.getId(el);
+
+        var id = el.id;
+        // This produces an error and seems needless anyway?
+        // var id = self.getId(el);
         hm.on('hover', function(e) {
           Shiny.onInputChange(id + '_hover', !e.data ? e.data : {
             label: e.data.label,

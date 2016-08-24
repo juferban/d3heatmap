@@ -259,10 +259,9 @@ function heatmap(selector, data, options) {
 
 
     var legend_size = gridSizer.getCellBounds(1,0);
-
     d3.select('.colorkey')
-      .attr('width', legend_size['width']*4)
-      .attr('height', legend_size['width'] * 2);
+      .attr('width', legend_size['height'] * 2)
+      .attr('height', legend_size['height'] * 2);
 
     var colDend = inner.append("svg").classed("dendrogram colDend", true).style(cssify(colDendBounds));
     var rowDend = inner.append("svg").classed("dendrogram rowDend", true).style(cssify(rowDendBounds));
