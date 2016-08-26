@@ -501,9 +501,9 @@ function heatmap(selector, data, options) {
     rect.enter().append("rect").classed("datapt", true)
         .property("colIndex", function(d, i) { return i % cols; })
         .property("rowIndex", function(d, i) { return Math.floor(i / cols); })
-        .property("value", function(d, i) { return d.value; })
+        .property("value", function(d, i) { return d; })
         .attr("fill", function(d) {
-          return(colorscale(d));
+          return(colorscale(d == null ? undefined : d));
         });
     rect.exit().remove();
     rect.append("title")
