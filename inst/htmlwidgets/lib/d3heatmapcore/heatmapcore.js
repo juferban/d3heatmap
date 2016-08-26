@@ -200,7 +200,7 @@ function heatmap(selector, data, options) {
   opts.row_cols = options.row_cols;
   opts.col_cols = options.col_cols;
   opts.show_color_legend = options.show_color_legend;
-
+  opts.na_color = options.NA_color;
 
   if (typeof(opts.anim_duration) === 'undefined') {
     opts.anim_duration = 500;
@@ -503,8 +503,12 @@ function heatmap(selector, data, options) {
         .property("rowIndex", function(d, i) { return Math.floor(i / cols); })
         .property("value", function(d, i) { return d; })
         .attr("fill", function(d) {
-          return(colorscale(d == null ? undefined : d));
-        });
+          return(
+            d == null ? 
+              opts.na_color : colorscale(d)
+            );
+          }
+        );
     rect.exit().remove();
     rect.append("title")
         .text(function(d, i) { return d; });

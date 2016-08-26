@@ -12,13 +12,13 @@ d3heatmap(x, main = "Heatmap", Rowv = TRUE, Colv = if (symm) "Rowv" else
   "column", "none"), reorderfun = function(d, w) reorder(d, w), k_row, k_col,
   symm = FALSE, revC, scale = c("none", "row", "column"), na.rm = TRUE,
   ColSideColors, RowSideColors, labRow = rownames(x), labCol = colnames(x),
-  cexRow, cexCol, digits = 3L, cellnote, cellnote_scale = FALSE,
-  theme = NULL, colors = "RdYlBu", breaks = 30, scalecolors = NULL,
-  symbreaks = FALSE, colorkey_title = "Value", show_color_legend = TRUE,
-  col_cols = NULL, row_cols = NULL, width = NULL, height = NULL,
-  xaxis_height = 80, yaxis_width = 120, xaxis_font_size = NULL,
-  yaxis_font_size = NULL, brush_color = "#0000FF", show_grid = TRUE,
-  anim_duration = 500, padding = 0, ...)
+  cexRow, cexCol, na_color = "#000000", digits = 3L, cellnote,
+  cellnote_scale = FALSE, theme = NULL, colors = "RdYlBu", breaks = 30,
+  scalecolors = NULL, symbreaks = FALSE, colorkey_title = "Value",
+  show_color_legend = TRUE, col_cols = NULL, row_cols = NULL,
+  width = NULL, height = NULL, xaxis_height = 80, yaxis_width = 120,
+  xaxis_font_size = NULL, yaxis_font_size = NULL, brush_color = "#0000FF",
+  show_grid = TRUE, anim_duration = 500, padding = 0, ...)
 }
 \arguments{
 \item{x}{A numeric matrix
@@ -67,6 +67,8 @@ and will give it a value cexRow*14}
 
 \item{cexCol}{positive numbers. If not missing, it will override \code{yaxis_font_size}
 and will give it a value cexCol*14}
+
+\item{na_color}{Color of NA values in heatmap. Defaults to black}
 
 \item{digits}{integer indicating the number of decimal places to be used by \link{round} for 'label'.}
 

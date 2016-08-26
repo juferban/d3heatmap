@@ -21,6 +21,7 @@ NULL
 #'   standalone visualizations, not R Markdown or Shiny.
 #' @param scalecolors Colors to be used in scale. Length
 #' must be equal to breaks
+#' @param na_color Color of NA values in heatmap. Defaults to black
 #' @param colors TEMPORARILY DISABLED WHILE TRANSITIONING
 #' METHOD FOR GENERATING COLORS. USE scalecolors INSTEAD.
 #' Either a colorbrewer2.org palette name (e.g. \code{"YlOrRd"} or
@@ -134,7 +135,7 @@ d3heatmap <- function(x,
 
   cexRow,
   cexCol,
-
+  na_color="#000000",
   ## value formatting
   digits = 3L,
   cellnote,
@@ -399,6 +400,7 @@ d3heatmap <- function(x,
     colors=scalecolors,
     col_cols=col_cols,
     row_cols=row_cols,
+    na_color=na_color,
     show_color_legend = show_color_legend
   ))
 
